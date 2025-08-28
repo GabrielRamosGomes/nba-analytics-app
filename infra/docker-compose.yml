@@ -4,7 +4,6 @@ name: nba-analytics-app
 services:
   backend:
     build:
-      # path is relative to this compose file (infra/terraform). Adjust if you move this file.
       context: ../backend
       dockerfile: Dockerfile
     image: nba-analytics-backend:latest
