@@ -1,0 +1,26 @@
+version: "3.8"
+name: nba-analytics-app
+
+services:
+  backend:
+    build:
+      # path is relative to this compose file (infra/terraform). Adjust if you move this file.
+      context: ../backend
+      dockerfile: Dockerfile
+    image: nba-analytics-backend:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: nba-analytics-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

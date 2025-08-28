@@ -1,0 +1,27 @@
+# Node
+node_modules/
+dist/
+build/
+.pnpm-store/
+
+# Git
+.git
+.gitignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+**/Dockerfile
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+
+# Logs
+*.log
