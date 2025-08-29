@@ -26,6 +26,8 @@ lerna-debug.log*
 env/
 ENV/
 venv/
+# Dataset files
+backend/app/data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
