@@ -27,7 +27,7 @@ env/
 ENV/
 venv/
 # Dataset files
-backend/app/data/
+backend/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

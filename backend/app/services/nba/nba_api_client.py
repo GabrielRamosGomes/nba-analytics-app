@@ -67,7 +67,7 @@ class NBAApiClient:
 
     def collect_and_store_dataset(self, seasons: List[str] = None, source: str = "local", prefix: str = "nba-data") -> bool:
         """ Collect data for specified seasons and store to specified source (local or s3) """
-        dataset = self.collector.collect_seasonal_data(seasons=seasons)
+        dataset = self.collector.collect_comprehensive_dataset(seasons=seasons)
 
         if not dataset:
             logger.error("No data collected to store.")
