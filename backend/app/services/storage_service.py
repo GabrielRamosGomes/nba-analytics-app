@@ -137,8 +137,8 @@ class StorageService:
             # Load datasets (latest if specified)
             for dataset_name, files in csv_files.items():
                 if latest_only:
-                    lastest_file = max(files, key=lambda x: x['modified'])
-                    key = lastest_file['Key']
+                    latest_file = max(files, key=lambda x: x['modified'])
+                    key = latest_file['Key']
                 else:
                     # Just take the first file
                     key = files[0]['Key']
