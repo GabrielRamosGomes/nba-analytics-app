@@ -9,7 +9,6 @@ app = FastAPI(
 
 app.include_router(routes.router, prefix="/api")
 
-
 @app.get("/")
 def root():
     return {"message": "Welcome to the NBA Analytics API"}
