@@ -8,6 +8,8 @@ from nba_api.stats.endpoints import (
     leaguedashteamstats,
     playerindex,
 )
+from .nba_settings import NBASettings
+
 from nba_api.stats.static import players, teams
 import time
 import logging
@@ -40,14 +42,15 @@ class NBADataCollector:
             logger.error(f"Error retrieving NBA teams: {e}")
             return pd.DataFrame()
         
-    def get_season_player_stats(self, season: str = "2023-24") -> pd.DataFrame:
+    def get_season_player_stats(self, season: str = None) -> pd.DataFrame:
         """
         Get comprehensive player stats for a given season \n
         Season format: "2023-24"
         """
         try:
             logger.info(f"Fetching player stats for season {season}")
-
+            season = season or NBASettings.DEFAULT_SEASON
+        
             player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
                 season=season,
                 season_type_all_star="Regular Season",
@@ -60,12 +63,13 @@ class NBADataCollector:
             logger.error(f"Error retrieving player stats for season {season}: {e}")
             return pd.DataFrame()
         
-    def get_team_stats(self, season: str = "2023-24") -> pd.DataFrame:
+    def get_team_stats(self, season: str = None) -> pd.DataFrame:
         """
         Get comprehensive team stats for a given season \n
         Season format: "2023-24"
         """
         try:
+            season = season or NBASettings.DEFAULT_SEASON
             logger.info(f"Fetching team stats for season {season}")
 
             team_stats = leaguedashteamstats.LeagueDashTeamStats(
@@ -97,7 +101,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = ["2021-22", "2022-23", "2023-24"]
+            seasons = NBASettings.DEFAULT_SEASONS_LIST
 
         dataset = {}
 
@@ -141,7 +145,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = ["2023-24"]
+            seasons = [NBASettings.DEFAULT_SEASON]
 
         try:
             comparison_data = []
