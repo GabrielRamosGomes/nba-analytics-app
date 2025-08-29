@@ -22,7 +22,7 @@ class NBAApiClient:
         """ Get player stats for a given season, with optional caching """
         cache_key = f"player_stats_{season}"
 
-        if not use_cache and cache_key in self.cached_data:
+        if use_cache and cache_key in self.cached_data:
             logger.info(f"Returning cached player stats for season {season}")
             return self.cached_data[cache_key]
 
@@ -49,7 +49,7 @@ class NBAApiClient:
         """ Compare stats for multiple players across specified seasons """
         return self.collector.get_player_season_comparison_data(player_names, seasons)
 
-    def get_top_permofers(self, stat_col: str, top_n: int = 10, season: str = None) -> pd.DataFrame:
+    def get_top_performers(self, stat_col: str, top_n: int = 10, season: str = None) -> pd.DataFrame:
         """ Get top performers in a specific stat for a given season """
         season = season or NBASettings.DEFAULT_SEASON
 

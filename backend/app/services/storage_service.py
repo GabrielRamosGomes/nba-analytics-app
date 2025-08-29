@@ -52,8 +52,8 @@ class StorageService:
                 logger.info(f"Saved {name} to S3 as {csv_key} and {json_key}")
 
             return True
-        except:
-            logger.exception("Failed to save data to S3.")
+        except Exception as e:
+            logger.error(f"Failed to save data to S3: {e}")
             return False
     
     def save_to_local(self, dataset: Dict[str, pd.DataFrame], directory: str = "data") -> bool:
@@ -135,7 +135,7 @@ class StorageService:
                     })
 
             # Load datasets (latest if specified)
-            for dataset_name, files in csv_files.item():
+            for dataset_name, files in csv_files.items():
                 if latest_only:
                     lastest_file = max(files, key=lambda x: x['modified'])
                     key = lastest_file['Key']
