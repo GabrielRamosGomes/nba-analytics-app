@@ -58,8 +58,6 @@ def setup_nba_dataset():
         logger.info("NBA dataset setup completed successfully!")
         return True
 
-
-        return True
     except Exception as e:
         logger.error(f"Failed to setup NBA dataset: {e}")
         return False
