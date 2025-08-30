@@ -12,7 +12,7 @@ class Settings:
         TESTING = "test"
 
     def __init__(self):
-        self.enviroment = self._get_environment()
+        self.environment = self._get_environment()
 
     def _get_environment(self) -> Environment:
         env_str = os.getenv("ENVIRONMENT", "dev").lower()

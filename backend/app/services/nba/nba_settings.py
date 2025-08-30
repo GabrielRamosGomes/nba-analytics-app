@@ -20,9 +20,9 @@ class NBASettings:
     def __init__(self):
         self.s3_bucket = self.get_s3_bucket()
 
-    @classmethod
+    @staticmethod
     def get_s3_data_bucket(self) -> str:
         """ Get S3 bucket name based on environment """
         bucket_name = os.getenv("S3_NBA_DATA_BUCKET_NAME", "nba-analytics-data")
 
-        return f"{bucket_name}-{settings.enviroment.value}"
+        return f"{bucket_name}-{settings.environment.value}"

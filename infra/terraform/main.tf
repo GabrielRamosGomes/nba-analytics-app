@@ -85,11 +85,6 @@ output "aws_region" {
     value       = var.aws_region
 }
 
-output "aws_access_key_id" {
-    description = "AWS Access Key ID for programmatic access"
-    value       = aws_iam_access_key.nba_data_access_key.id
-}
-
 output "s3_bucket_arn" {
     description = "S3 bucket ARN"
     value       = aws_s3_bucket.nba_data_bucket.arn
