@@ -20,20 +20,23 @@ def setup_nba_dataset():
     """ Setup NBA dataset by collecting and storing data """
     logger.info("Starting NBA dataset setup...")
 
-    client = NBAApiClient()
+    s3_bucket = NBASettings.get_s3_data_bucket()
+    client = NBAApiClient(s3_bucket)
     seasons = NBASettings.DEFAULT_SEASONS_LIST
+    
     try:
         logger.info("Collecting and storing NBA dataset...")
+        source = "local"  # Change to "s3" if you want to load from S3
         success = client.collect_and_store_dataset(
             seasons=seasons,
-            source="local", # Change to "s3" if you want to load from S3
+            source=source,
         )
 
         if not success:
             logger.error("Failed to collect and store NBA dataset.")
             return False
         
-        dataset = client.load_dataset(source="local")
+        dataset = client.load_dataset(source=source)
 
         # Print summary
         logger.info("\nDataset Collection Summary:")
