@@ -9,3 +9,9 @@ variable "project_name" {
     type        = string
     default     = "nba-analytics"
 }
+
+variable "environment" {
+    description = "Deployment environment (e.g., dev, prod)"
+    type        = string
+    default     = "dev"
+}
