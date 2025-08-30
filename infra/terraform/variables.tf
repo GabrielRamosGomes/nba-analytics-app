@@ -10,16 +10,6 @@ variable "project_name" {
     default     = "nba-analytics"
 }
 
-variable "aws_access_key" {
-    description = "AWS access key"
-    type        = string
-}
-
-variable "aws_secret_key" {
-    description = "AWS secret key"
-    type        = string
-}
-
 variable "environment" {
     description = "Deployment environment (e.g., dev, prod)"
     type        = string
