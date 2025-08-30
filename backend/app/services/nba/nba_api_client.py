@@ -13,10 +13,12 @@ class NBAApiClient:
     High-level client that orchestrates data collection and storage
     """
 
-    def __init__(self, s3_bucket: str = None):
+    def __init__(self):
         self.collector = NBADataCollector()
-        self.storage = StorageService(s3_bucket=s3_bucket)
         self.cached_data = {}
+
+        s3_bucket = NBASettings.get_s3_data_bucket()
+        self.storage = StorageService(s3_bucket)
 
     def get_player_stats(self, season: str = "2023-24", use_cache: bool = True) -> pd.DataFrame:
         """ Get player stats for a given season, with optional caching """
