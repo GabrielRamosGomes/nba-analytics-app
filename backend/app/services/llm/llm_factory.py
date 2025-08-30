@@ -13,19 +13,19 @@ def get_llm():
     provider = settings.get_env_var("LLM_PROVIDER", "openai").lower()  
     if provider == "openai":
         return ChatOpenAI(
-            model = "gpt-4",
+            model = "gpt-4o-mini",
             temperature = 0,
             api_key = settings.get_env_var("OPENAPI_API_KEY"),
         )
     elif provider == "anthropic":
         return ChatAnthropic(
-            model = "claude-sonnet-4-20250514",
+            model = "claude-3-5-sonnet-20241022",
             temperature = 0,
             api_key = settings.get_env_var("ANTHROPIC_API_KEY"),
         )
     elif provider == "mistral":
         return ChatMistralAI(
-            model = "mistral-medium-2508",
+            model = "mistral-small-latest",
             temperature = 0,
             api_key = settings.get_env_var("MISTRAL_API_KEY"),
         )
