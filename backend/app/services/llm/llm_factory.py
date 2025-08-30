@@ -1,16 +1,19 @@
-import os
+import logging
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from ...core.settings import settings
 
+logger = logging.getLogger(__name__)
+
 # For now use the env var to set the LLM provider later there will be a config
 def get_llm():
     """ Return LLM client based on provider env var. \n
         Defaults to openai 
     """
-    provider = settings.get_env_var("LLM_PROVIDER", "openai").lower()  
+    provider = settings.get_env_var("LLM_PROVIDER", "openai").lower()
+    logger.info(f"Using LLM provider: {provider}")
     if provider == "openai":
         return ChatOpenAI(
             model = "gpt-4o-mini",
@@ -35,3 +38,5 @@ def get_llm():
             temperature = 0,
             api_key = settings.get_env_var("GOOGLE_API_KEY"),
         )
+    else:
+        raise ValueError(f"Unsupported LLM provider: {provider}")

@@ -1,8 +1,10 @@
 import pandas as pd
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from langchain.schema import HumanMessage, SystemMessage
+from pydantic import BaseModel, Field
+from enum import Enum
 
 from ..nba.nba_api_client import NBAApiClient
 from ..nba.nba_settings import NBASettings
@@ -11,6 +13,36 @@ from ...core.settings import settings
 
 
 logger = logging.getLogger(__name__)
+
+class QueryIntent(str, Enum):
+    PLAYER_STATS = "player_stats"
+    PLAYER_COMPARISON = "player_comparison"
+    TEAM_STATS = "team_stats"
+    TEAM_COMPARISON = "team_comparison"
+    TOP_PERFORMERS = "top_performers"
+    SEASON_ANALYSIS = "season_analysis"
+
+class Timeframe(str, Enum):
+    SEASON = "season"
+    CAREER = "career"
+    GAME = "game"
+    RECENT = "recent"
+
+class ComparisonType(str, Enum):
+    VS = "vs"
+    RANKING = "ranking"
+    TOP_N = "top_n"
+
+class NBAQueryAnalysis(BaseModel):
+    """Structured output for NBA query analysis"""
+    intent: QueryIntent = Field(description="The type of NBA query being asked")
+    players: List[str] = Field(default=[], description="List of player names mentioned")
+    teams: List[str] = Field(default=[], description="List of team names mentioned")
+    seasons: List[str] = Field(default=[], description="List of seasons in format '2023-24'")
+    stats: List[str] = Field(default=[], description="Statistical categories like 'points', 'assists', 'rebounds'")
+    timeframe: Timeframe = Field(default=Timeframe.SEASON, description="Time scope of the query")
+    comparison_type: Optional[ComparisonType] = Field(default=None, description="Type of comparison if applicable")
+    top_n: int = Field(default=10, description="Number of top performers if applicable")
 
 class NBAQueryProcessor:
     """
@@ -25,6 +57,8 @@ class NBAQueryProcessor:
         """
         Analyze the user's question to extract intent and parameters
         """
+
+        structured_llm = self.llm.with_structured_output(NBAQueryAnalysis)
 
         system_prompt = f"""
             You are an NBA data analyst. Analyze the user's question and extract the following information in JSON format:
@@ -50,16 +84,18 @@ class NBAQueryProcessor:
             HumanMessage(content=f"Analyze this NBA question: {question}")
         ]
 
-        response = self.llm(messages)
         try:
-            analysis = json.loads(response.content)
+            analysis = structured_llm.invoke(messages)
 
-            if not analysis.get("seasons"):
-                analysis["seasons"] = [NBASettings.DEFAULT_SEASON]
+            result = analysis.model_dump()
 
-            return analysis
+            if not result.get("seasons"):
+                result["seasons"] = [NBASettings.DEFAULT_SEASON]
+
+            logger.info(f"Query analysis successful: {result}")
+            return result
         except json.JSONDecodeError:
-            logger.warning(f"Could not parse LLM analysis: {response.content}")
+            logger.error("Failed to parse LLM output, returning default analysis")
             return {
                 "intent": "general",
                 "players": [],
