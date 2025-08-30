@@ -6,19 +6,15 @@ class NBASettings:
     """
     Centralized settings for NBA Analytics App
     """
+    # For now this is hardcoded, but could be made dynamic in the future
+    DEFAULT_SEASON: str = "2024-25"
 
-    DEFAULT_SEASON: str = "2023-24"
-
+    # Same here
     DEFAULT_SEASONS_LIST: List[str] = [
-        "2021-22",
         "2022-23",
-        "2023-24"
+        "2023-24",
+        "2024-25",
     ]
-
-    DEFAULT_DATA_FORMAT: str = "csv"
-
-    def __init__(self):
-        self.s3_bucket = self.get_s3_bucket()
 
     @staticmethod
     def get_s3_data_bucket() -> str:
