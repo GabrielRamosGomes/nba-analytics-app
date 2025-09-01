@@ -20,8 +20,7 @@ def setup_nba_dataset():
     """ Setup NBA dataset by collecting and storing data """
     logger.info("Starting NBA dataset setup...")
 
-    s3_bucket = NBASettings.get_s3_data_bucket()
-    client = NBAApiClient(s3_bucket)
+    client = NBAApiClient()
     seasons = NBASettings.DEFAULT_SEASONS_LIST
     
     try:
@@ -35,30 +34,7 @@ def setup_nba_dataset():
         if not success:
             logger.error("Failed to collect and store NBA dataset.")
             return False
-        
-        dataset = client.load_dataset(source=source)
 
-        # Print summary
-        logger.info("\nDataset Collection Summary:")
-        logger.info("=" * 50)
-        
-        for name, df in dataset.items():
-            if not df.empty:
-                logger.info(f"{name.upper()}:")
-                logger.info(f"  - Records: {len(df):,}")
-                logger.info(f"  - Columns: {len(df.columns)}")
-                
-                if 'SEASON' in df.columns:
-                    seasons_in_data = df['SEASON'].unique()
-                    logger.info(f"  - Seasons: {list(seasons_in_data)}")
-                
-                if 'PLAYER_NAME' in df.columns:
-                    player_count = df['PLAYER_NAME'].nunique()
-                    logger.info(f"  - Unique Players: {player_count}")
-                
-                logger.info("")
-        
-        logger.info("NBA dataset setup completed successfully!")
         return True
 
     except Exception as e:

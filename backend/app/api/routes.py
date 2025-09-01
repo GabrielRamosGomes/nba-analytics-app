@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from ..services.llm.nba_query_processor import NBAQueryProcessor
+from ..services.nba.nba_api_client import NBAApiClient
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,3 +29,10 @@ def process_nba_query(request: NBAQueryRequest):
     except Exception as e:
         logger.error(f"Error in NBA query endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/test")
+def test_endpoint(request: NBAQueryRequest):
+    client = NBAApiClient()
+    data = client.get_player_stats(player=request.question, season="2023-24", use_cache=False)
+
+    return {"data": data.head().to_dict(orient="records")}
