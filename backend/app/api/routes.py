@@ -35,6 +35,7 @@ class SetupDatasetRequest(BaseModel):
     source: str = Field(default="local", description="Storage source: 'local' or 's3'")
     seasons: Optional[List[str]] = Field(default=None, description="List of seasons like ['2022-23', '2023-24']. If None, uses default seasons.")
 
+# Later this will be setup as a scheduled task or admin-triggered action
 @router.post("/setup-dataset")
 def setup_nba_dataset(request: SetupDatasetRequest):
     client = NBAApiClient()
