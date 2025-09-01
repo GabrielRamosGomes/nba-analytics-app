@@ -1,6 +1,6 @@
 from .nba_data_collector import NBADataCollector
-from ..storage_service import StorageService
 from .nba_settings import NBASettings
+from ..storage.base_storage import BaseStorage 
 
 import pandas as pd
 from typing import Dict, List, Optional
@@ -13,13 +13,12 @@ class NBAApiClient:
     High-level client that orchestrates data collection and storage
     """
 
-    def __init__(self):
+    def __init__(self, storage: BaseStorage):
         self.cached_data = {}
+        self.storage = storage
 
-        s3_bucket = NBASettings.get_s3_data_bucket()
-        self.storage = StorageService(s3_bucket)
 
-    def collect_and_store_dataset(self, seasons: List[str] = None, source: str = "local", prefix: str = "nba-data") -> bool:
+    def collect_and_store_dataset(self, seasons: List[str] = None, prefix: str = "nba-data") -> bool:
         """ Collect data for specified seasons and store to specified source (local or s3) """
         collector = NBADataCollector()
         dataset = collector.collect_comprehensive_dataset(seasons=seasons)
@@ -28,15 +27,9 @@ class NBAApiClient:
             logger.error("No data collected to store.")
             return False
 
-        if source == "local":
-            return self.storage.save_to_local(dataset)
-        elif source == "s3":
-            return self.storage.save_to_s3(dataset, prefix=prefix)
-        else:
-            logger.error(f"Unknown storage source: {source}")
-            return False
+        return self.storage.save(dataset=dataset, prefix=prefix)
  
-    def setup_nba_dataset(self, source: str = "local", seasons: List[str] = None) -> bool:
+    def setup_nba_dataset(self, seasons: List[str] = None, prefix: str = "nba-data") -> bool:
         """ Setup NBA dataset by collecting and storing data  \n
             Source can be 'local' or 's3'  \n
             Seasons is a list of season strings like ["2022-23", "2023-24"]
@@ -47,10 +40,7 @@ class NBAApiClient:
         
         try:
             logger.info("Collecting and storing NBA dataset...")
-            success = self.collect_and_store_dataset(
-                seasons=seasons,
-                source=source,
-            )
+            success = self.collect_and_store_dataset(seasons=seasons, prefix=prefix)
 
             if not success:
                 logger.error("Failed to collect and store NBA dataset.")
@@ -61,3 +51,15 @@ class NBAApiClient:
         except Exception as e:
             logger.error(f"Failed to setup NBA dataset: {e}")
             return False
+        
+    def load_data(self, prefix: str = "nba-data", latest_only: bool = True) -> Dict[str, pd.DataFrame]:
+        """ Load data using the configured storage """
+        try:
+            dataset = self.storage.load(prefix=prefix, latest_only=latest_only)
+            self.cached_data = dataset
+            if not dataset:
+                logger.warning("No data loaded from storage.")
+            return dataset
+        except Exception as e:
+            logger.error(f"Failed to load data from storage: {e}")
+            return {}

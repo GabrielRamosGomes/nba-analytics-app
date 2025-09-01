@@ -3,6 +3,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from ..services.llm.nba_query_processor import NBAQueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
+from ..services.storage.s3_storage import S3Storage
+from ..services.nba.nba_settings import NBASettings
+from ..services.storage.local_storage import LocalStorage
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,9 +41,15 @@ class SetupDatasetRequest(BaseModel):
 # Later this will be setup as a scheduled task or admin-triggered action
 @router.post("/setup-dataset")
 def setup_nba_dataset(request: SetupDatasetRequest):
-    client = NBAApiClient()
-    success = client.setup_nba_dataset(source=request.source, seasons=request.seasons)
+    storage = None
+    if request.source == "s3":
+        s3_bucket = NBASettings.get_s3_data_bucket()
+        storage = S3Storage(s3_bucket)
+    else:
+        storage = LocalStorage(base_directory="data")
 
+    client = NBAApiClient(storage=storage)
+    success = client.setup_nba_dataset(seasons=request.seasons)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to setup NBA dataset")
 
