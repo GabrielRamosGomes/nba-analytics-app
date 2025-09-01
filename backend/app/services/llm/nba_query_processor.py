@@ -110,7 +110,7 @@ class NBAQueryProcessor:
         Fetch relevant NBA data based on the analysis
         """
         
-        intent = analysis.get("intent", "player_stats") # Use player_statsa as a fallback
+        intent = analysis.get("intent", "player_stats") # Use player_stats as a fallback
         players =  analysis.get("players", [])
         teams = analysis.get("teams", [])
         seasons = analysis.get("seasons", [NBASettings.DEFAULT_SEASON])
