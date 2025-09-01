@@ -3,6 +3,10 @@ from enum import Enum
 from pathlib import Path
 from dotenv import load_dotenv
 
+from ..services.storage.s3_storage import S3Storage
+from ..services.storage.local_storage import LocalStorage
+from ..services.nba.nba_settings import NBASettings
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -43,5 +47,13 @@ class Settings:
     def get_env_var(self, var_name: str, default: str = None) -> str:
         return os.getenv(var_name, default)
     
+    def get_storage_service(self):
+        """ Returns the configured storage service based on env var """
+        storage_provider = self.get_env_var("STORAGE_TYPE", "local").lower()
+        if storage_provider == "s3":
+            s3_bucket = NBASettings.get_s3_data_bucket()
+            return S3Storage(s3_bucket)
+        else:
+            return LocalStorage(base_directory="data")
 
 settings = Settings()

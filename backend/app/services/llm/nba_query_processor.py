@@ -6,10 +6,10 @@ from langchain.schema import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from enum import Enum
 
+from ..llm.llm_factory import get_llm
 from ..nba.nba_api_client import NBAApiClient
 from ..nba.nba_settings import NBASettings
-from ..llm.llm_factory import get_llm
-from ...core.settings import settings
+from ..storage.base_storage import BaseStorage
 
 
 logger = logging.getLogger(__name__)
@@ -49,9 +49,9 @@ class NBAQueryProcessor:
     Processes natural language queries about NBA data using LangChain
     """
 
-    def __init__(self):
+    def __init__(self, storage: BaseStorage):
         self.llm = get_llm()
-        self.nba_client = NBAApiClient()
+        self.nba_client = NBAApiClient(storage=storage)
 
     def analyze_query(self, question: str) -> Dict[str, Any]:
         """

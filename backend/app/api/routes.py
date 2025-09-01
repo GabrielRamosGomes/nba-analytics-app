@@ -1,16 +1,18 @@
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
 from ..services.llm.nba_query_processor import NBAQueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
-from ..services.storage.s3_storage import S3Storage
 from ..services.nba.nba_settings import NBASettings
-from ..services.storage.local_storage import LocalStorage
+
+from ..core.settings import settings
 
 import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+storage = settings.get_storage_service()
 
 @router.get("/health")
 def health_check():
@@ -22,7 +24,7 @@ class NBAQueryRequest(BaseModel):
 @router.post("/query")
 def process_nba_query(request: NBAQueryRequest):
     try: 
-        proccessor = NBAQueryProcessor()
+        proccessor = NBAQueryProcessor(storage=storage)
         analyze = proccessor.analyze_query(request.question)
 
         relevant_data = proccessor.fetch_relevant_data(analyze)
@@ -35,19 +37,11 @@ def process_nba_query(request: NBAQueryRequest):
         raise HTTPException(status_code=500, detail=str(e))
     
 class SetupDatasetRequest(BaseModel):
-    source: str = Field(default="local", description="Storage source: 'local' or 's3'")
     seasons: Optional[List[str]] = Field(default=None, description="List of seasons like ['2022-23', '2023-24']. If None, uses default seasons.")
 
 # Later this will be setup as a scheduled task or admin-triggered action
 @router.post("/setup-dataset")
 def setup_nba_dataset(request: SetupDatasetRequest):
-    storage = None
-    if request.source == "s3":
-        s3_bucket = NBASettings.get_s3_data_bucket()
-        storage = S3Storage(s3_bucket)
-    else:
-        storage = LocalStorage(base_directory="data")
-
     client = NBAApiClient(storage=storage)
     success = client.setup_nba_dataset(seasons=request.seasons)
     if not success:
