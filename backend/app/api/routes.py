@@ -1,5 +1,6 @@
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ..services.llm.nba_query_processor import NBAQueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
 
@@ -13,7 +14,7 @@ def health_check():
     return {"status": "ok"}
 
 class NBAQueryRequest(BaseModel):
-    question: str
+    question: str = Field(..., description="Natural language question about NBA data")
 
 @router.post("/query")
 def process_nba_query(request: NBAQueryRequest):
@@ -29,6 +30,20 @@ def process_nba_query(request: NBAQueryRequest):
     except Exception as e:
         logger.error(f"Error in NBA query endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+class SetupDatasetRequest(BaseModel):
+    source: str = Field(default="local", description="Storage source: 'local' or 's3'")
+    seasons: Optional[List[str]] = Field(default=None, description="List of seasons like ['2022-23', '2023-24']. If None, uses default seasons.")
+
+@router.post("/setup-dataset")
+def setup_nba_dataset(request: SetupDatasetRequest):
+    client = NBAApiClient()
+    success = client.setup_nba_dataset(source=request.source, seasons=request.seasons)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to setup NBA dataset")
+
+    return {"status": "NBA dataset setup completed successfully"}
     
 @router.post("/test")
 def test_endpoint(request: NBAQueryRequest):

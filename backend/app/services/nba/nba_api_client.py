@@ -35,3 +35,29 @@ class NBAApiClient:
         else:
             logger.error(f"Unknown storage source: {source}")
             return False
+ 
+    def setup_nba_dataset(self, source: str = "local", seasons: List[str] = None) -> bool:
+        """ Setup NBA dataset by collecting and storing data  \n
+            Source can be 'local' or 's3'  \n
+            Seasons is a list of season strings like ["2022-23", "2023-24"]
+        """
+        logger.info("Starting NBA dataset setup...")
+
+        seasons = seasons or NBASettings.DEFAULT_SEASONS_LIST
+        
+        try:
+            logger.info("Collecting and storing NBA dataset...")
+            success = self.collect_and_store_dataset(
+                seasons=seasons,
+                source=source,
+            )
+
+            if not success:
+                logger.error("Failed to collect and store NBA dataset.")
+                return False
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to setup NBA dataset: {e}")
+            return False
