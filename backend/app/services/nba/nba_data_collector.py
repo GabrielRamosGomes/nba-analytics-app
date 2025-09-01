@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 
 class NBADataCollector:
     """
-    A class to collect NBA data from various endpoints.
+    A class to collect NBA data from various endpoints. \n
+    This class is intended for infrequent use to gather and update datasets. \n
+    Do not use this class for serving user queries in real-time.
     """
 
     def get_all_players(self) -> pd.DataFrame:
@@ -42,7 +44,7 @@ class NBADataCollector:
             logger.error(f"Error retrieving NBA teams: {e}")
             return pd.DataFrame()
         
-    def get_season_player_stats(self, season: str = None) -> pd.DataFrame:
+    def get_all_players_season_stats(self, season: str = None) -> pd.DataFrame:
         """
         Get comprehensive player stats for a given season \n
         Season format: "2023-24"
@@ -118,7 +120,7 @@ class NBADataCollector:
             logger.info(f"Collecting data for season {season}...")
 
             # Player stats
-            player_stats = self.get_season_player_stats(season)
+            player_stats = self.get_all_players_season_stats(season)
             if not player_stats.empty:
                 all_player_stats.append(player_stats)
 
