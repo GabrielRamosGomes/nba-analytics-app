@@ -97,9 +97,9 @@ class NBADataCollector:
             logger.error(f"Error retrieving career stats for player {player_id}: {e}")
             return pd.DataFrame()
     
-    def collect_comprehensive_dataset(self, seasons: List[str] = None) -> Dict[str, pd.DataFrame]:
+    def collect_dataset(self, seasons: List[str] = None) -> Dict[str, pd.DataFrame]:
         """
-        Collect comprehensive NBA dataset for analysis
+        Collect NBA dataset for analysis
         """
 
         if seasons is None:
