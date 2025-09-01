@@ -17,7 +17,6 @@ class NBAApiClient:
         self.cached_data = {}
         self.storage = storage
 
-
     def collect_and_store_dataset(self, seasons: List[str] = None, prefix: str = "nba-data") -> bool:
         """ Collect data for specified seasons and store to specified source (local or s3) """
         collector = NBADataCollector()
