@@ -18,7 +18,7 @@ def get_llm():
         return ChatOpenAI(
             model = "gpt-4o-mini",
             temperature = 0,
-            api_key = settings.get_env_var("OPENAPI_API_KEY"),
+            api_key = settings.get_env_var("OPENAI_API_KEY"),
         )
     elif provider == "anthropic":
         return ChatAnthropic(
