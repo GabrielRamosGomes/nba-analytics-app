@@ -18,7 +18,12 @@ class NBAQueryRequest(BaseModel):
 def process_nba_query(request: NBAQueryRequest):
     try: 
         proccessor = NBAQueryProcessor()
-        analyze = proccessor._analyze_query(request.question)
+        analyze = proccessor.analyze_query(request.question)
+
+        relevant_data = proccessor.fetch_relevant_data(analyze)
+
+        logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
+
         return {"analysis": analyze}
     except Exception as e:
         logger.error(f"Error in NBA query endpoint: {e}")

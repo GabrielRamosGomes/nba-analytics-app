@@ -53,7 +53,7 @@ class NBAQueryProcessor:
         self.llm = get_llm()
         self.nba_client = NBAApiClient()
 
-    def _analyze_query(self, question: str) -> Dict[str, Any]:
+    def analyze_query(self, question: str) -> Dict[str, Any]:
         """
         Analyze the user's question to extract intent and parameters
         """
@@ -104,3 +104,38 @@ class NBAQueryProcessor:
                 "stats": [],
                 "timeframe": "season"
             }
+        
+    def fetch_relevant_data(self, analysis: Dict[str, Any]) -> pd.DataFrame:
+        """
+        Fetch relevant NBA data based on the analysis
+        """
+        
+        intent = analysis.get("intent", "player_stats") # Use player_statsa as a fallback
+        players =  analysis.get("players", [])
+        teams = analysis.get("teams", [])
+        seasons = analysis.get("seasons", [NBASettings.DEFAULT_SEASON])
+        top_n = analysis.get("top_n", 10)
+
+        try:
+            if intent in [QueryIntent.PLAYER_COMPARISON, QueryIntent.PLAYER_STATS]:
+                logger.info(f"Fetching player stats for players: {players} in seasons: {seasons}")
+                data = self.nba_client.get_player_stats(players=players, seasons=seasons)
+            elif intent in [QueryIntent.TEAM_COMPARISON, QueryIntent.TEAM_STATS]:
+                logger.info(f"Fetching team stats for teams: {teams} in seasons: {seasons}")
+                data = self.nba_client.get_team_stats(teams=teams, seasons=seasons)
+            elif intent == QueryIntent.TOP_PERFORMERS:
+                logger.info(f"Fetching top {top_n} performers in seasons: {seasons}")
+                data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n)
+            else:
+                logger.info(f"Fetching general player stats for seasons: {seasons[0]}")
+                season = seasons[0] if seasons else NBASettings.DEFAULT_SEASON
+                data = self.nba_client.get_player_stats(seasons=[season])
+
+
+            logger.info(f"Fetched {len(data)} records")
+            return data
+        except Exception as e:
+            logger.error(f"Error fetching NBA data: {e}")
+            return pd.DataFrame()
+
+        
