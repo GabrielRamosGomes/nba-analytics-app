@@ -54,10 +54,3 @@ def setup_nba_dataset(request: SetupDatasetRequest):
         raise HTTPException(status_code=500, detail="Failed to setup NBA dataset")
 
     return {"status": "NBA dataset setup completed successfully"}
-    
-@router.post("/test")
-def test_endpoint(request: NBAQueryRequest):
-    client = NBAApiClient()
-    data = client.get_player_stats(player=request.question, season="2023-24", use_cache=False)
-
-    return {"data": data.head().to_dict(orient="records")}
