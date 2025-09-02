@@ -5,7 +5,7 @@ import time
 import pandas as pd
 import pytest
 
-from ..services.storage.local_storage import LocalStorage
+from ...services.storage.local_storage import LocalStorage
 
 def make_df():
     return pd.DataFrame({
