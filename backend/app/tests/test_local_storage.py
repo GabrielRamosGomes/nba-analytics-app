@@ -120,7 +120,7 @@ def test_load_catch_exception(tmp_path, monkeypatch, caplog):
     # Force pd.read_csv used inside local_storage to raise an exception
     monkeypatch.setattr(
         "app.services.storage.local_storage.pd.read_csv",
-        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom"))
+        lambda *a, **k: exec('raise RuntimeError("boom")')
     )
 
     caplog.set_level(logging.ERROR)
