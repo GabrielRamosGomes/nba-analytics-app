@@ -60,7 +60,7 @@ def test_collect_and_store_dataset_no_data(monkeypatch):
     assert success is False
 
 def test_setup_dataset_success(monkeypatch):
-    collector = make_fake_collector()      
+    collector = make_fake_collector()
     monkeypatch.setattr(COLLECTOR_PATH, collector)
 
     fake_storage = make_fake_storage()
