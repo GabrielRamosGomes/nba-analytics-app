@@ -23,10 +23,10 @@ class NBAQueryRequest(BaseModel):
 @router.post("/query")
 def process_nba_query(request: NBAQueryRequest):
     try: 
-        proccessor = NBAQueryProcessor(storage=storage)
-        analyze = proccessor.analyze_query(request.question)
+        processor = NBAQueryProcessor(storage=storage)
+        analyze = processor.analyze_query(request.question)
 
-        # relevant_data = proccessor.fetch_relevant_data(analyze)
+        # relevant_data = processor.fetch_relevant_data(analyze)
         # logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
 
         return {"analysis": analyze}
