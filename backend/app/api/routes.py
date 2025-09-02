@@ -26,8 +26,8 @@ def process_nba_query(request: NBAQueryRequest):
         proccessor = NBAQueryProcessor(storage=storage)
         analyze = proccessor.analyze_query(request.question)
 
-        relevant_data = proccessor.fetch_relevant_data(analyze)
-        logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
+        # relevant_data = proccessor.fetch_relevant_data(analyze)
+        # logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
 
         return {"analysis": analyze}
     except Exception as e:
