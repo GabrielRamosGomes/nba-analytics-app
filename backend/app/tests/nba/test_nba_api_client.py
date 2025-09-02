@@ -30,7 +30,7 @@ def make_fake_storage(initial_load=None, save_result=True):
 
         def load(self, prefix, latest_only):
             return self._load_value
-        
+
     return FakeStorage()
 
 def test_collect_and_store_dataset_success(monkeypatch):
