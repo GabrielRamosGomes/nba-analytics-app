@@ -118,7 +118,7 @@ def test_load_data_exception():
     class BadStorage:
         def load(self, prefix, latest_only):
             raise RuntimeError("Load error")
-        
+
     fake_storage = BadStorage()
     client = NBAApiClient(storage=fake_storage)
 
