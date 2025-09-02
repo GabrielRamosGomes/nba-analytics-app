@@ -1,24 +1,24 @@
 import pandas as pd
 import boto3
-import json
-import os 
 from datetime import datetime
 from typing import Dict, Optional
 import logging
 
+from .base_storage import BaseStorage
+
 logger = logging.getLogger(__name__)
 
-class StorageService:
+class S3Storage(BaseStorage):
     """
-    Handles data storage operations (local and S3)
+    AWS S3 storage implementation.
     """
 
-    def __init__(self, s3_bucket: Optional[str] = None):
+    def __init__(self, s3_bucket: str):
         self.s3_bucket = s3_bucket
         self.s3_client = boto3.client('s3') if s3_bucket else None
 
-    def save_to_s3(self, dataset: Dict[str, pd.DataFrame], prefix: str = "nba-data") -> bool:
 
+    def save(self, dataset: Dict[str, pd.DataFrame], prefix: str = "nba-data") -> bool:
         if not self.s3_client or not self.s3_bucket:
             logger.error("S3 client or bucket not configured.")
             return False
@@ -55,55 +55,11 @@ class StorageService:
         except Exception as e:
             logger.error(f"Failed to save data to S3: {e}")
             return False
-    
-    def save_to_local(self, dataset: Dict[str, pd.DataFrame], directory: str = "data") -> bool:
-        try:
-            os.makedirs(directory, exist_ok=True)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-            for name, df in dataset.items():
-                if df.empty:
-                    continue
-
-                csv_path = os.path.join(directory, f"{name}_{timestamp}.csv")
-                json_path = os.path.join(directory, f"{name}_{timestamp}.json")
-                
-                df.to_csv(csv_path, index=False)
-                df.to_json(json_path, orient="records", indent=2)
-
-                logger.info(f"Saved {name} locally as {csv_path} and {json_path}")
-
-            return True
-        except Exception as e:
-            logger.error(f"Failed to save data locally: {e}")
-            return False
         
-    def load_from_local(self, directory: str = "data", file_pattern: str = None) -> Dict[str, pd.DataFrame]:
-        dataset = {}
-        
-        try:
-            if not os.path.exists(directory):
-                logger.warning(f"Directory {directory} does not exist.")
-                return dataset
-
-            # Find CSV files
-            for filename in os.listdir(directory):
-                if filename.endswith(".csv") and (file_pattern is None or file_pattern in filename):
-                    file_path = os.path.join(directory, filename)
-                    
-                    name = filename.replace('.csv', '').split('_')[0]
-                    
-                    df = pd.read_csv(file_path)
-                    dataset[name] = df
-                    
-                    logger.info(f"Loaded {name} from {file_path}")
-                
-            return dataset
-        except Exception as e:
-            logger.error(f"Failed to load data from local: {e}")
-            return dataset
-        
-    def load_from_s3(self, prefix: str = "nba-data", latest_only: bool = True) -> Dict[str, pd.DataFrame]:
+    def load(self, prefix: str = "nba-data", latest_only: bool = True) -> Dict[str, pd.DataFrame]:
+        """
+        Load the dataset from S3.
+        """
         dataset = {}
 
         if not self.s3_client or not self.s3_bucket:
@@ -153,4 +109,3 @@ class StorageService:
         except Exception as e:
             logger.error(f"Failed to load data from S3: {e}")
             return dataset
-    

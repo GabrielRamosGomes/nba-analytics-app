@@ -1,37 +1,42 @@
-import os
+import logging
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from ...core.settings import settings
+
+logger = logging.getLogger(__name__)
 
 # For now use the env var to set the LLM provider later there will be a config
 def get_llm():
     """ Return LLM client based on provider env var. \n
         Defaults to openai 
     """
-    provider = os.getenv("LLM_PROVIDER", "openai").lower()
-
+    provider = settings.get_env_var("LLM_PROVIDER", "openai").lower()
+    logger.info(f"Using LLM provider: {provider}")
     if provider == "openai":
         return ChatOpenAI(
-            model = "gpt-4",
+            model = "gpt-4o-mini",
             temperature = 0,
-            api_key = os.getenv("OPENAI_API_KEY"),
+            api_key = settings.get_env_var("OPENAI_API_KEY"),
         )
     elif provider == "anthropic":
         return ChatAnthropic(
-            model = "claude-sonnet-4-20250514",
+            model = "claude-3-5-sonnet-20241022",
             temperature = 0,
-            api_key = os.getenv("ANTHROPIC_API_KEY"),
+            api_key = settings.get_env_var("ANTHROPIC_API_KEY"),
         )
     elif provider == "mistral":
         return ChatMistralAI(
-            model = "mistral-medium-2508",
+            model = "mistral-small-latest",
             temperature = 0,
-            api_key = os.getenv("MISTRAL_API_KEY"),
+            api_key = settings.get_env_var("MISTRAL_API_KEY"),
         )
     elif provider == "google":
         return ChatGoogleGenerativeAI(
             model = "gemini-2.5-flash",
             temperature = 0,
-            api_key = os.getenv("GOOGLE_API_KEY"),
+            api_key = settings.get_env_var("GOOGLE_API_KEY"),
         )
+    else:
+        raise ValueError(f"Unsupported LLM provider: {provider}")

@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import date
 from typing import List, Dict, Optional
+from ...core.settings import NBASettings
 from nba_api.stats.endpoints import (
     commonplayerinfo,
     playercareerstats,
@@ -8,7 +9,6 @@ from nba_api.stats.endpoints import (
     leaguedashteamstats,
     playerindex,
 )
-from .nba_settings import NBASettings
 
 from nba_api.stats.static import players, teams
 import time
@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 
 class NBADataCollector:
     """
-    A class to collect NBA data from various endpoints.
+    A class to collect NBA data from various endpoints. \n
+    This class is intended for infrequent use to gather and update datasets. \n
+    Do not use this class for serving user queries in real-time.
     """
 
     def get_all_players(self) -> pd.DataFrame:
@@ -42,7 +44,7 @@ class NBADataCollector:
             logger.error(f"Error retrieving NBA teams: {e}")
             return pd.DataFrame()
         
-    def get_season_player_stats(self, season: str = None) -> pd.DataFrame:
+    def get_all_players_season_stats(self, season: str = None) -> pd.DataFrame:
         """
         Get comprehensive player stats for a given season \n
         Season format: "2023-24"
@@ -95,9 +97,9 @@ class NBADataCollector:
             logger.error(f"Error retrieving career stats for player {player_id}: {e}")
             return pd.DataFrame()
     
-    def collect_comprehensive_dataset(self, seasons: List[str] = None) -> Dict[str, pd.DataFrame]:
+    def collect_dataset(self, seasons: List[str] = None) -> Dict[str, pd.DataFrame]:
         """
-        Collect comprehensive NBA dataset for analysis
+        Collect NBA dataset for analysis
         """
 
         if seasons is None:
@@ -118,7 +120,7 @@ class NBADataCollector:
             logger.info(f"Collecting data for season {season}...")
 
             # Player stats
-            player_stats = self.get_season_player_stats(season)
+            player_stats = self.get_all_players_season_stats(season)
             if not player_stats.empty:
                 all_player_stats.append(player_stats)
 
