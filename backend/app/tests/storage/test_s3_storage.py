@@ -6,6 +6,8 @@ import pytest
 
 from app.services.storage.s3_storage import S3Storage
 
+S3_CLIENT_PATH = "app.services.storage.s3_storage.boto3.client"
+
 class FakeS3Client:
     def __init__(self):
         # store put_object calls as dict[(Bucket,Key)] = bytes
@@ -50,11 +52,11 @@ def create_load_files(monkeypatch):
     fake.get_map[("b", "pfx/players_old.csv")] = csv_old
     fake.get_map[("b", "pfx/players_new.csv")] = csv_new
 
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
 def test_save_success(monkeypatch):
     fake = FakeS3Client()
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     storage = S3Storage(s3_bucket="my-bucket")
     ok = storage.save({"players": pd.DataFrame({"a": [1]})}, prefix="pfx")
@@ -67,7 +69,7 @@ def test_save_success(monkeypatch):
 
 def test_save_skips_empty_df(monkeypatch):
     fake = FakeS3Client()
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     storage = S3Storage(s3_bucket="my-bucket")
     ok = storage.save({"players": pd.DataFrame({"a": []})}, prefix="pfx")
@@ -76,7 +78,7 @@ def test_save_skips_empty_df(monkeypatch):
 
 def test_save_not_configured(monkeypatch):
     fake = FakeS3Client()
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     storage = S3Storage(s3_bucket=None)
     ok = storage.save({"players": pd.DataFrame({"a": [1]})}, prefix="pfx")
@@ -89,7 +91,7 @@ def test_fail_save_exception(monkeypatch):
             raise Exception("Simulated failure")
 
     fake = FailingS3Client()
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     storage = S3Storage(s3_bucket="my-bucket")
     ok = storage.save({"players": pd.DataFrame({"a": [1]})}, prefix="pfx")
@@ -106,7 +108,7 @@ def test_load_not_configured(caplog):
 def test_load_no_objects(monkeypatch, caplog):
     fake = FakeS3Client()
     fake.list_response = {"KeyCount": 0}
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     bucket = "my-bucket"
     prefix = "pfx"
@@ -145,7 +147,7 @@ def test_fail_load_exception(monkeypatch, caplog):
             raise Exception("Simulated failure")
 
     fake = FailingS3Client()
-    monkeypatch.setattr("app.services.storage.s3_storage.boto3.client", lambda *a, **k: fake)
+    monkeypatch.setattr(S3_CLIENT_PATH, lambda *a, **k: fake)
 
     storage = S3Storage(s3_bucket="b")
     caplog.set_level(logging.ERROR)
