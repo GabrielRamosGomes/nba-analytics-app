@@ -41,6 +41,6 @@ def test_save_success(monkeypatch):
     assert ok is True
 
     # confirm csv and json keys were created in store
-    keys = [k for (b, k) in fake.store.keys() if (b == "my-m")] if False else [k for (b,k) in fake.store.keys() if b == "my-bucket"]
+    keys = [k for (b, k) in fake.store.keys() if b == "my-bucket"]
     assert any(k.endswith(".csv") and "players" in k for k in keys)
     assert any(k.endswith(".json") and "players" in k for k in keys)
