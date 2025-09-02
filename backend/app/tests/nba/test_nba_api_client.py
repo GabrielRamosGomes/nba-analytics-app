@@ -83,7 +83,7 @@ def test_setup_dataset_exception(monkeypatch):
     class BadCollector:
         def collect_dataset(self, seasons=None):
             raise RuntimeError("Collection error")
-        
+
     monkeypatch.setattr(COLLECTOR_PATH, BadCollector)
 
     fake_storage = make_fake_storage(save_result=False)
