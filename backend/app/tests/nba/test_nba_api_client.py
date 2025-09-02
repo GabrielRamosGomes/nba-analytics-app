@@ -12,7 +12,7 @@ def make_fake_collector(dataset=None):
     class FakeCollector:
         def collect_dataset(self, seasons=None):
             return dataset if dataset is not None else default
-        
+
     return FakeCollector
 
 def make_fake_storage(initial_load=None, save_result=True):
