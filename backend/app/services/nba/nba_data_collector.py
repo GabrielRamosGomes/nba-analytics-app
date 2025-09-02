@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import date
 from typing import List, Dict, Optional
+from ...core.settings import NBASettings
 from nba_api.stats.endpoints import (
     commonplayerinfo,
     playercareerstats,
@@ -8,7 +9,6 @@ from nba_api.stats.endpoints import (
     leaguedashteamstats,
     playerindex,
 )
-from .nba_settings import NBASettings
 
 from nba_api.stats.static import players, teams
 import time

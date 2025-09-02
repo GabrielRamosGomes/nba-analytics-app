@@ -1,11 +1,11 @@
 import os
 from enum import Enum
 from pathlib import Path
+from typing import List
 from dotenv import load_dotenv
 
 from ..services.storage.s3_storage import S3Storage
 from ..services.storage.local_storage import LocalStorage
-from ..services.nba.nba_settings import NBASettings
 
 import logging
 logger = logging.getLogger(__name__)
@@ -31,6 +31,7 @@ class Settings:
             logger.warning(f"⚠️ .env file not found at {env_path}. Using system environment variables.")
         
         self.environment = self._get_environment()
+        self.storage = self.__create_storage()
 
 
     def _get_environment(self) -> Environment:
@@ -47,7 +48,7 @@ class Settings:
     def get_env_var(self, var_name: str, default: str = None) -> str:
         return os.getenv(var_name, default)
     
-    def get_storage_service(self):
+    def __create_storage(self):
         """ Returns the configured storage service based on env var """
         storage_provider = self.get_env_var("STORAGE_TYPE", "local").lower()
         if storage_provider == "s3":
@@ -55,5 +56,24 @@ class Settings:
             return S3Storage(s3_bucket)
         else:
             return LocalStorage(base_directory="data")
+        
+class NBASettings:
+    """
+    NBA-specific settings
+    """
+    # For now this is hardcoded, but could be made dynamic in the future
+    DEFAULT_SEASON: str = "2024-25"
+
+    # Same here
+    DEFAULT_SEASONS_LIST: List[str] = [
+        "2022-23",
+        "2023-24",
+        "2024-25",
+    ]
+
+    def get_s3_data_bucket() -> str:
+        """ Get S3 bucket name based on environment """
+        bucket_name = settings.get_env_var("S3_NBA_DATA_BUCKET_NAME", "nba-analytics-data")
+        return f"{bucket_name}-{settings.environment.value}"
 
 settings = Settings()

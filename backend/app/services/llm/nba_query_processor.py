@@ -6,10 +6,10 @@ from langchain.schema import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from enum import Enum
 
-from ..llm.llm_factory import get_llm
 from ..nba.nba_api_client import NBAApiClient
-from ..nba.nba_settings import NBASettings
+from ..llm.llm_factory import get_llm
 from ..storage.base_storage import BaseStorage
+from ...core.settings import NBASettings
 
 
 logger = logging.getLogger(__name__)

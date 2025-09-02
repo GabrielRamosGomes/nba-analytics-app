@@ -1,5 +1,5 @@
 from .nba_data_collector import NBADataCollector
-from .nba_settings import NBASettings
+from ...core.settings import NBASettings
 from ..storage.base_storage import BaseStorage 
 
 import pandas as pd

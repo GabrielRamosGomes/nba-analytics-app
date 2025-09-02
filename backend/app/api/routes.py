@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 
 from ..services.llm.nba_query_processor import NBAQueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
-from ..services.nba.nba_settings import NBASettings
 
 from ..core.settings import settings
 
@@ -12,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-storage = settings.get_storage_service()
+storage = settings.storage
 
 @router.get("/health")
 def health_check():
@@ -28,7 +27,6 @@ def process_nba_query(request: NBAQueryRequest):
         analyze = proccessor.analyze_query(request.question)
 
         relevant_data = proccessor.fetch_relevant_data(analyze)
-
         logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
 
         return {"analysis": analyze}
