@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..services.llm.nba_query_processor import NBAQueryProcessor
+from ..services.llm.query_processor import NBAQueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
 
 from ..core.settings import settings

@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 
 from ..nba.nba_api_client import NBAApiClient
-from ..llm.llm_factory import get_llm
+from .llm_factory import get_llm
 from ..storage.base_storage import BaseStorage
 from ...core.settings import NBASettings
 
@@ -33,7 +33,7 @@ class ComparisonType(str, Enum):
     RANKING = "ranking"
     TOP_N = "top_n"
 
-class NBAQueryAnalysis(BaseModel):
+class QueryAnalysis(BaseModel):
     """Structured output for NBA query analysis"""
     intent: QueryIntent = Field(description="The type of NBA query being asked")
     players: List[str] = Field(default=[], description="List of player names mentioned")
@@ -44,7 +44,7 @@ class NBAQueryAnalysis(BaseModel):
     comparison_type: Optional[ComparisonType] = Field(default=None, description="Type of comparison if applicable")
     top_n: int = Field(default=10, description="Number of top performers if applicable")
 
-class NBAQueryProcessor:
+class QueryProcessor:
     """
     Processes natural language queries about NBA data using LangChain
     """
@@ -58,7 +58,7 @@ class NBAQueryProcessor:
         Analyze the user's question to extract intent and parameters
         """
 
-        structured_llm = self.llm.with_structured_output(NBAQueryAnalysis)
+        structured_llm = self.llm.with_structured_output(QueryAnalysis)
 
         system_prompt = f"""
             You are an NBA data analyst. Analyze the user's question and extract the following information in JSON format:
