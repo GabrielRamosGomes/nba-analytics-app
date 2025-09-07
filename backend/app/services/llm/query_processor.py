@@ -141,6 +141,10 @@ class QueryProcessor:
             #     logger.info(f"Fetching general player stats for seasons: {seasons[0]}")
             #     season = seasons[0] if seasons else nba_settings.DEFAULT_SEASON
             #     data = self.nba_client.get_player_stats(seasons=[season])
+            else:
+                logger.info(f"Intent '{intent}' not recognized. Returning empty DataFrame.")
+                data = pd.DataFrame()
+
             logger.info(f"Fetched {len(data)} records")
             return data
         except Exception as e:
