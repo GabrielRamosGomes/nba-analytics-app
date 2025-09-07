@@ -3,6 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
+from datetime import date
 
 from ..services.storage.s3_storage import S3Storage
 from ..services.storage.local_storage import LocalStorage
@@ -62,14 +63,48 @@ class NBASettings:
     NBA-specific settings
     """
     # For now this is hardcoded, but could be made dynamic in the future
-    DEFAULT_SEASON: str = "2024-25"
+    DEFAULT_SEASON: str = ''
 
     # Same here
-    DEFAULT_SEASONS_LIST: List[str] = [
-        "2022-23",
-        "2023-24",
-        "2024-25",
-    ]
+    DEFAULT_SEASONS_LIST: List[str] = []
+
+    def __init__(self):
+        self.DEFAULT_SEASON = self.get_current_season()
+        self.DEFAULT_SEASONS_LIST = self.get_season_list(num_seasons=3)
+
+    @staticmethod
+    def get_current_season() -> str:
+        """ Get the current NBA season in format '2023-24' """
+        today = date.today()
+        year = today.year
+        month = today.month
+
+
+        # NBA season starts in October
+        if month >= 10:
+            start_year = year
+            end_year = year + 1
+        else:
+            start_year = year - 1
+            end_year = year
+        
+        return f"{start_year}-{str(end_year)[-2:]}"
+
+    @staticmethod
+    def get_season_list(num_seasons: int = 5) -> List[str]:
+        """
+        Return a list of the most recent `num_years` seasons including current.
+        """
+        current_season = NBASettings.get_current_season()
+        start_year = int(current_season.split('-')[0])
+
+        seasons = []
+        for i in range(num_seasons):
+            season_start = start_year - i
+            season_end = season_start + 1
+            seasons.append(f"{season_start}-{str(season_end)[-2:]}")
+
+        return seasons
 
     def get_s3_data_bucket() -> str:
         """ Get S3 bucket name based on environment """
@@ -77,3 +112,4 @@ class NBASettings:
         return f"{bucket_name}-{settings.environment.value}"
 
 settings = Settings()
+nba_settings = NBASettings()
