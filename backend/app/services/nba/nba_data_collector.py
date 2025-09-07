@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
 from typing import List, Dict, Optional
-from ...core.settings import NBASettings
+from ...core.settings import nba_settings
 from nba_api.stats.endpoints import (
     commonplayerinfo,
     playercareerstats,
@@ -75,7 +75,7 @@ class NBADataCollector:
         """
         try:
             logger.info(f"Fetching player stats for season {season}")
-            season = season or NBASettings.DEFAULT_SEASON
+            season = season or nba_settings.DEFAULT_SEASON
 
             per_game = leaguedashplayerstats.LeagueDashPlayerStats(
                 season=season,
@@ -114,7 +114,7 @@ class NBADataCollector:
         Season format: "2023-24"
         """
         try:
-            season = season or NBASettings.DEFAULT_SEASON
+            season = season or nba_settings.DEFAULT_SEASON
             logger.info(f"Fetching team stats for season {season}")
 
             team_stats = leaguedashteamstats.LeagueDashTeamStats(
@@ -146,7 +146,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = NBASettings.DEFAULT_SEASONS_LIST
+            seasons = nba_settings.DEFAULT_SEASONS_LIST
 
         dataset = {}
 
@@ -191,7 +191,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = [NBASettings.DEFAULT_SEASON]
+            seasons = [nba_settings.DEFAULT_SEASON]
 
         try:
             comparison_data = []

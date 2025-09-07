@@ -1,7 +1,7 @@
 from .nba_data_collector import NBADataCollector
 from ..storage.base_storage import BaseStorage 
 
-from ...core.settings import NBASettings
+from ...core.settings import nba_settings
 from ...core.cache import cache
 
 import pandas as pd
@@ -41,7 +41,7 @@ class NBAApiClient:
         """
         logger.info("Starting NBA dataset setup...")
 
-        seasons = seasons or NBASettings.DEFAULT_SEASONS_LIST
+        seasons = seasons or nba_settings.DEFAULT_SEASONS_LIST
         
         try:
             logger.info("Collecting and storing NBA dataset...")

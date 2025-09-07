@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from ..services.llm.query_processor import QueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
 
-from ..core.settings import settings, NBASettings
+from ..core.settings import settings
 
 import logging
 logger = logging.getLogger(__name__)
