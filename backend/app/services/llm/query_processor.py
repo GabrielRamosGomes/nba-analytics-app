@@ -55,11 +55,11 @@ class QueryProcessor:
         self.nba_client = NBAApiClient(storage=storage)
 
     def query(self, query: str):
-        analize = self._analyze_query(query)
+        analysis = self._analyze_query(query)
         
-        data = self._fetch_relevant_data(analize)
+        data = self._fetch_relevant_data(analysis)
         
-        answer = self._generate_answer(original_question=query, analysis=analize, data=data)
+        answer = self._generate_answer(original_question=query, analysis=analysis, data=data)
 
         return answer
 
