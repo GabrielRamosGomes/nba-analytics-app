@@ -1,9 +1,15 @@
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 
 from app.services.nba.nba_api_client import NBAApiClient
+from app.core.cache import cache
 
 COLLECTOR_PATH = "app.services.nba.nba_api_client.NBADataCollector"
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    cache.clear()
 
 def make_fake_collector(dataset=None):
     """Return a FakeCollector class (not instance) so NBAApiClient can call it."""

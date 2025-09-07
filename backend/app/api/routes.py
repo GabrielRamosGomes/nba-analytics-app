@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..services.llm.nba_query_processor import NBAQueryProcessor
+from ..services.llm.query_processor import QueryProcessor
 from ..services.nba.nba_api_client import NBAApiClient
 
 from ..core.settings import settings
@@ -23,13 +23,10 @@ class NBAQueryRequest(BaseModel):
 @router.post("/query")
 def process_nba_query(request: NBAQueryRequest):
     try: 
-        processor = NBAQueryProcessor(storage=storage)
-        analyze = processor.analyze_query(request.question)
+        processor = QueryProcessor(storage=storage)
+        answer = processor.query(request.question)
 
-        # relevant_data = processor.fetch_relevant_data(analyze)
-        # logger.info(f"Relevant data fetched: {relevant_data.shape[0]} records")
-
-        return {"analysis": analyze}
+        return {"answer": answer }
     except Exception as e:
         logger.error(f"Error in NBA query endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
 from typing import List, Dict, Optional
-from ...core.settings import NBASettings
+from ...core.settings import nba_settings
 from nba_api.stats.endpoints import (
     commonplayerinfo,
     playercareerstats,
@@ -16,6 +16,30 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+MERGE_FIELDS = ["PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION"]
+def deduplicate_merged_columns(merged: pd.DataFrame, per_game: pd.DataFrame, totals: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove duplicate columns from merged per-game and totals DataFrames.
+    Keeps one version if values are identical across both,
+    otherwise leaves both with suffixes.
+    """
+    for col in per_game.columns:
+        if (
+            col in totals.columns
+            and col not in MERGE_FIELDS
+        ):
+            col_pg = f"{col}_PER_GAME"
+            col_tot = f"{col}_TOTALS"
+
+            if col_pg in merged.columns and col_tot in merged.columns:
+                # If values are identical, keep one and drop the other
+                if merged[col_pg].equals(merged[col_tot]):
+                    merged[col] = merged[col_pg]  # restore original name
+                    merged = merged.drop(columns=[col_pg, col_tot])
+    
+    return merged
+
 
 class NBADataCollector:
     """
@@ -51,16 +75,35 @@ class NBADataCollector:
         """
         try:
             logger.info(f"Fetching player stats for season {season}")
-            season = season or NBASettings.DEFAULT_SEASON
-        
-            player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
-                season=season,
-                season_type_all_star="Regular Season",
-            )
+            season = season or nba_settings.DEFAULT_SEASON
 
-            df = player_stats.get_data_frames()[0]
-            df["season"] = season
-            return df
+            per_game = leaguedashplayerstats.LeagueDashPlayerStats(
+                season=season,
+                per_mode_detailed="PerGame",
+                
+                season_type_all_star="Regular Season",
+            ).get_data_frames()[0]
+
+            totals = leaguedashplayerstats.LeagueDashPlayerStats(
+                season=season,
+                per_mode_detailed="Totals",
+                
+                season_type_all_star="Regular Season",
+            ).get_data_frames()[0]
+            
+            merge_fields = MERGE_FIELDS
+            
+            merged_stats = pd.merge(
+                per_game,
+                totals,
+                on=merge_fields,
+                suffixes=('_PER_GAME', '_TOTALS')
+            )       
+            merged_stats = deduplicate_merged_columns(merged_stats, per_game, totals)       
+
+            merged_stats["season"] = season
+            return merged_stats
+
         except Exception as e:
             logger.error(f"Error retrieving player stats for season {season}: {e}")
             return pd.DataFrame()
@@ -71,7 +114,7 @@ class NBADataCollector:
         Season format: "2023-24"
         """
         try:
-            season = season or NBASettings.DEFAULT_SEASON
+            season = season or nba_settings.DEFAULT_SEASON
             logger.info(f"Fetching team stats for season {season}")
 
             team_stats = leaguedashteamstats.LeagueDashTeamStats(
@@ -103,7 +146,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = NBASettings.DEFAULT_SEASONS_LIST
+            seasons = nba_settings.DEFAULT_SEASONS_LIST
 
         dataset = {}
 
@@ -119,10 +162,11 @@ class NBADataCollector:
         for season in seasons:
             logger.info(f"Collecting data for season {season}...")
 
-            # Player stats
+            # Player stats Per Game
             player_stats = self.get_all_players_season_stats(season)
             if not player_stats.empty:
                 all_player_stats.append(player_stats)
+
 
             # Team stats
             team_stats = self.get_team_stats(season)
@@ -147,7 +191,7 @@ class NBADataCollector:
         """
 
         if seasons is None:
-            seasons = [NBASettings.DEFAULT_SEASON]
+            seasons = [nba_settings.DEFAULT_SEASON]
 
         try:
             comparison_data = []

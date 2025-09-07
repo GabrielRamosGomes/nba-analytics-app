@@ -13,7 +13,6 @@ def get_llm():
         Defaults to openai 
     """
     provider = settings.get_env_var("LLM_PROVIDER", "openai").lower()
-    logger.info(f"Using LLM provider: {provider}")
     if provider == "openai":
         return ChatOpenAI(
             model = "gpt-4o-mini",

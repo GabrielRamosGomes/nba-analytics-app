@@ -30,3 +30,10 @@ PowerShell
 ```
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
 ```
+
+Running Tests
+----------------
+PowerShell
+```
+pytest --cov=app --cov-report=term-missing --cov-report=html
+```
