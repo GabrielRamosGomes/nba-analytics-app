@@ -79,7 +79,7 @@ class QueryProcessor:
                 "teams": ["list of team names mentioned"], 
                 "seasons": ["list of seasons mentioned, convert to format like '2023-24'"],
                 "stats": ["list of statistical categories mentioned like 'points', 'assists', 'rebounds'"],
-                "stats_type": "one of: per_game, totals, advanced". If not specified default to per_game,",
+                "stats_type": "one of: per_game, totals, advanced". If not specified default to per_game",
                 "timeframe": "one of: season, career, game, recent",
                 "comparison_type": "if comparing, what type: vs, ranking, top_n",
                 "top_n": "if asking for top performers, how many (default 10)"
