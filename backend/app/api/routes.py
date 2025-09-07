@@ -26,7 +26,6 @@ def process_nba_query(request: NBAQueryRequest):
         processor = QueryProcessor(storage=storage)
         answer = processor.query(request.question)
 
-        logger.info(answer)
         return {"answer": answer }
     except Exception as e:
         logger.error(f"Error in NBA query endpoint: {e}")
