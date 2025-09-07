@@ -37,4 +37,9 @@ class Cache:
             if key in self._store:
                 del self._store[key]
 
+    def clear(self):
+        """ Clear the entire cache. """
+        with self._lock:
+            self._store.clear()
+
 cache = Cache()
