@@ -83,7 +83,7 @@ class QueryProcessor:
                 "teams": ["list of team names mentioned, or empty if none"],
                 "seasons": ["list of seasons mentioned in 'YYYY-YY' format, or empty if none"],
                 "stats": ["list of statistical categories mentioned, or empty if none"],
-                "stats_type": "per_game, totals, advanced, or null if not specified",
+                "stats_type": "per_game, totals, advanced",
                 "timeframe": "one of {', '.join([e.value for e in Timeframe])}",
                 "comparison_type": "one of {', '.join([e.value for e in ComparisonType])} or null if not applicable",
                 "top_n": "integer number of top performers if applicable, default to 10"

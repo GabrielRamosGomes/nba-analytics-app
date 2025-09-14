@@ -241,6 +241,6 @@ class NBAApiClient:
 
         return top_df.reset_index(drop=True)
 
-    def get_top_players(self, seasons: List[str], top_n: int = 10, stat: str = "PTS") -> pd.DataFrame:
+    def get_top_players(self, seasons: List[str], top_n: int = 10, stat: str = "PTS", stats_type="per_game") -> pd.DataFrame:
         """ Get top N players based on specified stat for given seasons """
         pass
