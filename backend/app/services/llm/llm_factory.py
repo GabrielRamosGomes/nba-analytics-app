@@ -3,6 +3,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from ...core.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,12 @@ def get_llm():
             model = "gemini-2.5-flash",
             temperature = 0,
             api_key = settings.get_env_var("GOOGLE_API_KEY"),
+        )
+    elif provider == "ollama":
+        return ChatOllama(
+            model = "llama3.1",
+            temperature = 0,
+            base_url = settings.get_env_var("OLLAMA_BASE_URL", "http://localhost:11434"),
         )
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")

@@ -4,7 +4,7 @@ name: nba-analytics-app
 services:
   backend:
     build:
-      context: ../backend
+      context: ./backend
       dockerfile: Dockerfile
     image: nba-analytics-backend:latest
     restart: unless-stopped
@@ -15,7 +15,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: Dockerfile
     image: nba-analytics-frontend:latest
     restart: unless-stopped

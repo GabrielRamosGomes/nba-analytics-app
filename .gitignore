@@ -99,6 +99,7 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+infra/ollama/ollama
 
 # Local .terraform directories
 **/.terraform/*
