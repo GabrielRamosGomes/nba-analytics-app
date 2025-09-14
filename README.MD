@@ -1,5 +1,5 @@
 ## 🏀 NBA Analytics App
-A full-stack application that allows users to ask natural language questions about NBA statistics and get accurate answers from real NBA data. It features a Python FastAPI backend, a React frontend, and integrates with various LLM providers (OpenAI, Google PaLM, Anthropic, Mistral, Ollama) for natural language processing.
+A full-stack application that allows users to ask natural language questions about NBA statistics and get accurate answers from real NBA data. It features a Python FastAPI backend, a React frontend, and integrates with various LLM providers (OpenAI, Google, Anthropic, Mistral, Ollama) for natural language processing.
 
 ## Quick start (Docker Compose)
 1. Copy and fill environment variables:
