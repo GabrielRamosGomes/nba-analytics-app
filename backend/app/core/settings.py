@@ -65,6 +65,9 @@ class NBASettings:
     # For now this is hardcoded, but could be made dynamic in the future
     DEFAULT_SEASON: str = ''
 
+    PLAYER_STATS_DF = "player"
+    TEAM_STATS_DF = "team"
+
     # Same here
     DEFAULT_SEASONS_LIST: List[str] = []
 

@@ -14,6 +14,9 @@ from ...core.settings import nba_settings
 
 logger = logging.getLogger(__name__)
 
+class EntityType(str, Enum):
+    PLAYER = "player"
+    TEAM = "team"
 class QueryIntent(str, Enum):
     PLAYER_STATS = "player_stats"
     PLAYER_COMPARISON = "player_comparison"
@@ -44,6 +47,7 @@ class QueryAnalysis(BaseModel):
     timeframe: Timeframe = Field(default=Timeframe.SEASON, description="Time scope of the query")
     comparison_type: Optional[ComparisonType] = Field(default=None, description="Type of comparison if applicable")
     top_n: int = Field(default=10, description="Number of top performers if applicable")
+    entity: EntityType = Field(default=EntityType.PLAYER, description="Entity type: player or team")
 
 class QueryProcessor:
     """
@@ -83,6 +87,7 @@ class QueryProcessor:
                 "timeframe": "one of {', '.join([e.value for e in Timeframe])}",
                 "comparison_type": "one of {', '.join([e.value for e in ComparisonType])} or null if not applicable",
                 "top_n": "integer number of top performers if applicable, default to 10"
+                "entity": "one of {', '.join([e.value for e in EntityType])}"
             }}
 
             Rules:
@@ -138,6 +143,9 @@ class QueryProcessor:
         teams = analysis.get("teams", [])
         seasons = analysis.get("seasons", [nba_settings.DEFAULT_SEASON])
         top_n = analysis.get("top_n", 10)
+        stats = analysis.get("stats", [])
+        entity = analysis.get("entity", "player")
+        stats_type = analysis.get("stats_type", "per_game")
 
         try:
             if intent in [QueryIntent.PLAYER_COMPARISON, QueryIntent.PLAYER_STATS]:
@@ -148,7 +156,8 @@ class QueryProcessor:
                 data = self.nba_client.get_team_stats(teams=teams, seasons=seasons)
             elif intent == QueryIntent.TOP_PERFORMERS:
                 logger.info(f"Fetching top {top_n} performers in seasons: {seasons}")
-                data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n)
+                stat = stats[0] if stats else "points"
+                data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n, stat=stat, entity=entity, stats_type=stats_type)
             # else:
             #     logger.info(f"Fetching general player stats for seasons: {seasons[0]}")
             #     season = seasons[0] if seasons else nba_settings.DEFAULT_SEASON
@@ -179,7 +188,7 @@ class QueryProcessor:
             timeframe = analysis.get("timeframe", "season")
 
             system_prompt = f"""
-                You are an expert NBA analyst. Use the provided data to answer the user's question.
+                You are an expert NBA analyst. Use ONLY the provided dataset to answer the user's question.
 
                 User's question intent: {intent}
                 Players mentioned: {', '.join(players) if players else 'None'}
@@ -190,10 +199,19 @@ class QueryProcessor:
                 Stats type: {stats_type}
                 Top N (if applicable): {top_n}
                 
-                If the stats type is totals use columns ending with '_TOTALS', if per_game use '_PER_GAME'.
-                Data columns available: {', '.join(data.columns.tolist())}
+                Rules:
+                - Always provide a concise, data-driven answer.
+                - Use only the provided dataset; never hallucinate or invent stats.
+                - If stats_type = totals, only use columns ending in "_TOTALS".
+                - If stats_type = per_game, only use columns ending in "_PER_GAME".
+                - If stats_type = advanced, use advanced stats such as PER, TS%, WS, etc.
+                - If a requested stat is missing, explicitly state: "That stat is not available in the provided dataset."
+                - When comparing players or teams, present results side by side.
+                - For Top N queries, list the top performers in ranked order.
+                - Keep tone professional and analytical (avoid filler like "Based on the data provided...").
 
-                Provide a concise, informative answer based on the data.
+                Answer format:
+                1. One or two sentence summary of findings.
             """
             data_sample = data.head(10).to_dict(orient="records")  # Limit to first 10 records for context
 
