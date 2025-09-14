@@ -17,8 +17,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MERGE_FIELDS = ["PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION"]
-def deduplicate_merged_columns(merged: pd.DataFrame, per_game: pd.DataFrame, totals: pd.DataFrame) -> pd.DataFrame:
+def deduplicate_merged_columns(merged: pd.DataFrame, per_game: pd.DataFrame, totals: pd.DataFrame, merge_fields) -> pd.DataFrame:
     """
     Remove duplicate columns from merged per-game and totals DataFrames.
     Keeps one version if values are identical across both,
@@ -27,7 +26,7 @@ def deduplicate_merged_columns(merged: pd.DataFrame, per_game: pd.DataFrame, tot
     for col in per_game.columns:
         if (
             col in totals.columns
-            and col not in MERGE_FIELDS
+            and col not in merge_fields
         ):
             col_pg = f"{col}_PER_GAME"
             col_tot = f"{col}_TOTALS"
@@ -91,7 +90,7 @@ class NBADataCollector:
                 season_type_all_star="Regular Season",
             ).get_data_frames()[0]
             
-            merge_fields = MERGE_FIELDS
+            merge_fields = ["PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION"]
             
             merged_stats = pd.merge(
                 per_game,
@@ -99,7 +98,7 @@ class NBADataCollector:
                 on=merge_fields,
                 suffixes=('_PER_GAME', '_TOTALS')
             )       
-            merged_stats = deduplicate_merged_columns(merged_stats, per_game, totals)       
+            merged_stats = deduplicate_merged_columns(merged_stats, per_game, totals, merge_fields)       
 
             merged_stats["season"] = season
             return merged_stats
@@ -117,12 +116,28 @@ class NBADataCollector:
             season = season or nba_settings.DEFAULT_SEASON
             logger.info(f"Fetching team stats for season {season}")
 
-            team_stats = leaguedashteamstats.LeagueDashTeamStats(
+            per_game_team_stats = leaguedashteamstats.LeagueDashTeamStats(
                 season=season,
+                per_mode_detailed="PerGame",
                 season_type_all_star="Regular Season",
+            ).get_data_frames()[0]
+            
+            totals_team_stats = leaguedashteamstats.LeagueDashTeamStats(
+                season=season,
+                per_mode_detailed="Totals",
+                season_type_all_star="Regular Season",
+            ).get_data_frames()[0]
+
+            merged_fields = ["TEAM_ID", "TEAM_NAME"]
+            merged_team_stats = pd.merge(
+                per_game_team_stats,
+                totals_team_stats,
+                on=merged_fields,
+                suffixes=('_PER_GAME', '_TOTALS')
             )
 
-            df = team_stats.get_data_frames()[0]
+            df = deduplicate_merged_columns(merged_team_stats, per_game_team_stats, totals_team_stats, merged_fields)
+
             df["season"] = season
             return df
         except Exception as e:
