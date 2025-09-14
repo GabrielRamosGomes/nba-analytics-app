@@ -71,24 +71,35 @@ class QueryProcessor:
         structured_llm = self.llm.with_structured_output(QueryAnalysis)
 
         system_prompt = f"""
-            You are an NBA data analyst. Analyze the user's question and extract the following information in JSON format:
-
+            You are an NBA data analyst. Analyze the user's question and extract the following information in JSON format, strictly following the schema below:
+            
             {{
-                "intent": "one of: player_stats, player_comparison, team_stats, team_comparison, top_performers, season_analysis",
-                "players": ["list of player names mentioned"],
-                "teams": ["list of team names mentioned"], 
-                "seasons": ["list of seasons mentioned, convert to format like '2023-24'"],
-                "stats": ["list of statistical categories mentioned like 'points', 'assists', 'rebounds'"],
-                "stats_type": "one of: per_game, totals, advanced". If not specified default to per_game",
-                "timeframe": "one of: season, career, game, recent",
-                "comparison_type": "if comparing, what type: vs, ranking, top_n",
-                "top_n": "if asking for top performers, how many (default 10)"
+                "intent": "one of {', '.join([e.value for e in QueryIntent])}",
+                "players": ["list of player names mentioned, or empty if none"],
+                "teams": ["list of team names mentioned, or empty if none"],
+                "seasons": ["list of seasons mentioned in 'YYYY-YY' format, or empty if none"],
+                "stats": ["list of statistical categories mentioned, or empty if none"],
+                "stats_type": "per_game, totals, advanced, or null if not specified",
+                "timeframe": "one of {', '.join([e.value for e in Timeframe])}",
+                "comparison_type": "one of {', '.join([e.value for e in ComparisonType])} or null if not applicable",
+                "top_n": "integer number of top performers if applicable, default to 10"
             }}
 
-            Available seasons: {', '.join(nba_settings.DEFAULT_SEASONS_LIST)}
-            If no season is specified, assume current season ({nba_settings.DEFAULT_SEASON}).
-            Be flexible with player names (LeBron = LeBron James, Curry = Stephen Curry, etc.).
-            Be flexible with team names (Lakers = Los Angeles Lakers, Warriors = Golden State Warriors, etc.).
+            Rules:
+            - Always produce valid JSON only.
+            - If no players or teams are mentioned, assume a general stats query for the current season.
+            - If multiple players or teams are mentioned, treat it as a comparison query.
+            - If the question asks for "best", "top", "most", "highest", or "leading", treat it as a top_n query.
+            - If the question asks for "vs", "compare", or "comparison", treat it as a comparison query.
+            - If both comparison and top_n cues appear, prioritize comparison.
+            - If stats are not explicitly mentioned, leave "stats" as an empty list.
+            - If a season is ambiguous (e.g., "this year", "last season"), map it to the correct season from {nba_settings.DEFAULT_SEASONS_LIST}.
+
+            Context:
+            - Available seasons: {', '.join(nba_settings.DEFAULT_SEASONS_LIST)}
+            - If no season is specified, assume current season ({nba_settings.DEFAULT_SEASON}).
+            - Be flexible with player names (LeBron = LeBron James, Curry = Stephen Curry, etc.).
+            - Be flexible with team names (Lakers = Los Angeles Lakers, Warriors = Golden State Warriors, etc.).
         """
 
         messages = [
@@ -135,9 +146,9 @@ class QueryProcessor:
             elif intent in [QueryIntent.TEAM_COMPARISON, QueryIntent.TEAM_STATS]:
                 logger.info(f"Fetching team stats for teams: {teams} in seasons: {seasons}")
                 data = self.nba_client.get_team_stats(teams=teams, seasons=seasons)
-            # elif intent == QueryIntent.TOP_PERFORMERS:
-            #     logger.info(f"Fetching top {top_n} performers in seasons: {seasons}")
-            #     data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n)
+            elif intent == QueryIntent.TOP_PERFORMERS:
+                logger.info(f"Fetching top {top_n} performers in seasons: {seasons}")
+                data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n)
             # else:
             #     logger.info(f"Fetching general player stats for seasons: {seasons[0]}")
             #     season = seasons[0] if seasons else nba_settings.DEFAULT_SEASON
