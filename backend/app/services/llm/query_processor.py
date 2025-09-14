@@ -59,7 +59,7 @@ class QueryProcessor:
         
         data = self._fetch_relevant_data(analysis)
         
-        answer = self._generate_answer(original_question=query, analysis=analysis, data=data)
+        answer = self._generate_answer(analysis=analysis, data=data)
 
         return answer
 
@@ -88,6 +88,7 @@ class QueryProcessor:
             Available seasons: {', '.join(nba_settings.DEFAULT_SEASONS_LIST)}
             If no season is specified, assume current season ({nba_settings.DEFAULT_SEASON}).
             Be flexible with player names (LeBron = LeBron James, Curry = Stephen Curry, etc.).
+            Be flexible with team names (Lakers = Los Angeles Lakers, Warriors = Golden State Warriors, etc.).
         """
 
         messages = [
@@ -131,9 +132,9 @@ class QueryProcessor:
             if intent in [QueryIntent.PLAYER_COMPARISON, QueryIntent.PLAYER_STATS]:
                 logger.info(f"Fetching player stats for players: {players} in seasons: {seasons}")
                 data = self.nba_client.get_player_stats(players=players, seasons=seasons)
-            # elif intent in [QueryIntent.TEAM_COMPARISON, QueryIntent.TEAM_STATS]:
-            #     logger.info(f"Fetching team stats for teams: {teams} in seasons: {seasons}")
-            #     data = self.nba_client.get_team_stats(teams=teams, seasons=seasons)
+            elif intent in [QueryIntent.TEAM_COMPARISON, QueryIntent.TEAM_STATS]:
+                logger.info(f"Fetching team stats for teams: {teams} in seasons: {seasons}")
+                data = self.nba_client.get_team_stats(teams=teams, seasons=seasons)
             # elif intent == QueryIntent.TOP_PERFORMERS:
             #     logger.info(f"Fetching top {top_n} performers in seasons: {seasons}")
             #     data = self.nba_client.get_top_performers(seasons=seasons, top_n=top_n)
@@ -151,7 +152,7 @@ class QueryProcessor:
             logger.error(f"Error fetching NBA data: {e}")
             return pd.DataFrame()
         
-    def _generate_answer(self, original_question: str, analysis: Dict[str, Any], data: pd.DataFrame, stream: bool = False) -> Generator[Any, Any, Any]:
+    def _generate_answer(self, analysis: Dict[str, Any], data: pd.DataFrame, stream: bool = False) -> Generator[Any, Any, Any]:
         """ Generate a natural language answer based on the analysis and data """
         try:
             if data.empty:

@@ -82,9 +82,34 @@ class NBAApiClient:
             player_df[name_col].str.lower().isin([p.lower() for p in players]) &
             player_df[season_col].isin(seasons)
         ]
-        logger.info(f"Filtered player stats: {len(filtered)} records found for players {players} in seasons {seasons}")
         return filtered
 
+    def get_team_stats(self, teams: List[str], seasons: List[str]) -> pd.DataFrame:
+        """ Get team stats for given teams and seasons """
+        if not self.cached_data:
+            self.load_data()
+            
+        # Get "team" dataframe that contains all the teams stats
+        team_df = self.cached_data.get("team", pd.DataFrame())
+        if team_df.empty:
+            logger.warning("Team dataframe is empty.")
+            return pd.DataFrame()
+        
+        name_col = "TEAM_NAME"
+        season_col = "season"
+
+        if "TEAM_NAME" not in team_df.columns:
+            logger.warning('Expected column "TEAM_NAME" not found in team dataframe.')
+            return pd.DataFrame()
+        if "season" not in team_df.columns:
+            logger.warning('Expected column "season" not found in team dataframe.')
+            return pd.DataFrame()
+        
+        filtered = team_df[
+            team_df[name_col].str.lower().isin([t.lower() for t in teams]) &
+            team_df[season_col].isin(seasons)
+        ]
+        return filtered
 
     def load_data(self, prefix: str = "nba-data", latest_only: bool = True) -> Dict[str, pd.DataFrame]:
         """ Load data using the configured storage """
